@@ -51,20 +51,25 @@ cli.on("messageCreate", async (msg) => {
         adapterCreator: msg.member.voice.channel.guild.voiceAdapterCreator,
       });
       let res = await Youtube.getInfo({ url: args[0] });
+      console.debug(res);
       if (res != false) {
         let url: string = res.formats.filter(
           //@ts-ignore
           (f) => (f.mimeType as string).startsWith("audio/mp4;")
         )[0].url;
-        if (res.videoDetails.isLiveContent == true) {
+        console.debug(url);
+        if (
+          res.videoDetails.isLiveContent == true &&
+          Object.keys(res).find((k) => k == "liveData")
+        ) {
           //@ts-ignore
           url = res.liveData.data.segments.filter((d) =>
             (d.streamInf.codecs[0] as string).includes("mp4a")
-          )[0].url
+          )[0].url;
         }
         let player = DiscordVoice.createAudioPlayer();
         let src = DiscordVoice.createAudioResource(url, { inlineVolume: true });
-        src.volume?.setVolume(1 / 100 * 4);
+        src.volume?.setVolume((1 / 100) * 4);
         player.play(src);
         con.subscribe(player);
       }
