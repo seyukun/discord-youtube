@@ -10,8 +10,12 @@
 #      \/___/  \/_____/            \/_/ \/___/   \/_/\/_/\/___/  \/_/\/_/                  #
 #                                                                                          #
 #  [ Usage ]                                                                               #
-#  NAMESPACE=default DISCORD_TOKEN=AAAAAAAAAAAA.vvvvvv.BBBBBBBBBBB ./kubernetes/deploy.sh  #
-#                                                                                          #
+#  DISCORD_TOKEN=AAAAAAAAAAAA.vvvvvv.BBBBBBBBBBB ./kubernetes/deploy.sh                    #
+#
+#  *Environment options
+#   - NAMESPACE=(default/*)
+#   - DEBUG=(false/true)
+#
 ############################################################################################
 
 
