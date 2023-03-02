@@ -4,8 +4,13 @@ import * as YoutubeStreamUrl from "youtube-stream-url";
 import { Logger } from "tslog";
 import { config } from "dotenv";
 
+// configure environment from .env
 config();
+
+// change default console to 'tslog'
 const console = new Logger();
+
+// continue process when an error occurs and log
 process.on("uncaughtException", (err) => console.error(err));
 
 const cli = new Discord.Client({
