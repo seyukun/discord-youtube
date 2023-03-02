@@ -4,10 +4,10 @@ import * as YoutubeStreamUrl from "youtube-stream-url";
 import { Logger } from "tslog";
 import { config } from "dotenv";
 
-// configure environment from .env
+// Configure environment from .env
 config();
 
-// change default console to 'tslog'
+// Change default console to 'tslog'
 const console = new Logger();
 
 // continue process when an error occurs and log
@@ -44,55 +44,53 @@ cli.on("messageCreate", async (message) => {
   )
     return;
 
-  // if start "n!" of message content
+  // If start "n!" of message content
   if (message.content.startsWith("n!")) {
-    // resolve options
+    // Resolve options
     let args: string[];
     [...args] = message.content
       .slice(2, message.content.length)
       .split(" ")
       .filter((m) => m != "");
 
-    // create connection
+    // Create connection
     let connection = DiscordVoice.joinVoiceChannel({
       channelId: message.member.voice.channel.id,
       guildId: message.guild.id,
       adapterCreator: message.member.voice.channel.guild.voiceAdapterCreator,
     });
 
-    // get youtube stream url
+    // Get youtube stream url
     let youtubeStreamUrl = await YoutubeStreamUrl.getInfo({ url: args[0] });
 
     debug(youtubeStreamUrl);
-    if (youtubeStreamUrl != false) {
-      // get stream url
+    if (!!youtubeStreamUrl) {
+      // Get stream url
       let url: string =
-        // make sure its live stream
+        // Make sure its live stream
         youtubeStreamUrl.videoDetails.isLiveContent == true &&
         !!Object.keys(youtubeStreamUrl).find((k) => k == "liveData")
-          ? // if its live, get live stream url
-            (youtubeStreamUrl as any).liveData.data.segments.filter((d: any) =>
-              (d.streamInf.codecs[0] as string).includes("mp4a")
-            )[0].url
-          : // if its not live, get archive stream url
-            youtubeStreamUrl.formats.filter((f: any) =>
-              (f.mimeType as string).startsWith("audio/mp4;")
-            )[0].url;
+          ? // If its live, get live stream url
+            // prettier-ignore
+            (youtubeStreamUrl as any).liveData.data.segments.filter((d: any) =>(d.streamInf.codecs[0] as string).includes("mp4a"))[0].url
+          : // If its not live, get archive stream url
+            // prettier-ignore
+            youtubeStreamUrl.formats.filter((f: any) => (f.mimeType as string).startsWith("audio/mp4;"))[0].url;
 
-      // create audio player
+      // Create audio player
       let player = DiscordVoice.createAudioPlayer();
 
-      // create audio resource
+      // Create audio resource
       // prettier-ignore
       let audioResource = DiscordVoice.createAudioResource(url, { inlineVolume: true });
 
-      // configure audio volume (0.04 / 100)
+      // Configure audio volume (0.04 / 100)
       audioResource.volume!.setVolume((1 / 100) * 4);
 
-      // set audio resource to player
+      // Set audio resource to player
       player.play(audioResource);
 
-      // set audio player to connection
+      // Set audio player to connection
       connection.subscribe(player);
     }
   }
