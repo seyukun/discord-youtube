@@ -53,13 +53,6 @@ cli.on("messageCreate", async (message) => {
       .split(" ")
       .filter((m) => m != "");
 
-    // Create connection
-    let connection = DiscordVoice.joinVoiceChannel({
-      channelId: message.member.voice.channel.id,
-      guildId: message.guild.id,
-      adapterCreator: message.member.voice.channel.guild.voiceAdapterCreator,
-    });
-
     // Get youtube stream url
     let youtubeStreamUrl = await YoutubeStreamUrl.getInfo({ url: args[0] });
 
@@ -76,6 +69,13 @@ cli.on("messageCreate", async (message) => {
           : // If its not live, get archive stream url
             // prettier-ignore
             youtubeStreamUrl.formats.filter((f: any) => (f.mimeType as string).startsWith("audio/mp4;"))[0].url;
+
+      // Create connection
+      let connection = DiscordVoice.joinVoiceChannel({
+        channelId: message.member.voice.channel.id,
+        guildId: message.guild.id,
+        adapterCreator: message.member.voice.channel.guild.voiceAdapterCreator,
+      });
 
       // Create audio player
       let player = DiscordVoice.createAudioPlayer();
