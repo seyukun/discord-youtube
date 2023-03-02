@@ -44,7 +44,7 @@ cli.on("messageCreate", async (message) => {
   )
     return;
 
-  // If start "n!" of message content
+  // Make sure received message is start with "n!"
   if (message.content.startsWith("n!")) {
     // Resolve options
     let args: string[];
