@@ -34,7 +34,6 @@ const debug = async (message: any) => !!process.env.debug ? console.debug(messag
 // prettier-ignore
 cli.on("ready", async () => { console.info("ready"); });
 
-
 cli.on("messageCreate", async (message) => {
   if (
     message.author.bot ||
