@@ -52,21 +52,21 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: discord-youtube
-  name: discord-youtube
+    app: discord-youtube-frontend
+  name: discord-youtube-frontend
   namespace: $NAMESPACE
 spec: 
   replicas: 1
   selector:
     matchLabels:
-      app: discord-youtube
+      app: discord-youtube-frontend
   template:
     metadata:
       labels:
-        app: discord-youtube
+        app: discord-youtube-frontend
     spec:
       containers:
-      - name: discord-youtube
+      - name: discord-youtube-frontend
         image: docheio/git-runner-nodejs:19.4.0
         env:
         - name: REPO
@@ -76,5 +76,19 @@ spec:
         - name: DEBUG
           value: $DEBUG
         - name: START_COMMAND
-          value: npm run archlinux
+          value: cd server frontend && npm run archlinux
+---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: coder
+# spec:
+#   selector:
+#     app: coder
+#   type: LoadBalancer
+#   ports:
+#   - name: coder
+#     protocol: TCP
+#     port: 8080
+#     targetPort: http
 EOF
