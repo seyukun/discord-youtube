@@ -76,7 +76,7 @@ spec:
         - name: DEBUG
           value: $DEBUG
         - name: START_COMMAND
-          value: cd server frontend && npm run archlinux
+          value: cd ./server/frontend && npm run archlinux
 ---
 # apiVersion: v1
 # kind: Service
