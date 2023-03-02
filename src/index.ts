@@ -72,7 +72,7 @@ cli.on("messageCreate", async (message) => {
         !!Object.keys(youtubeStreamUrl).find((k) => k == "liveData")
           ? // If its live, get live stream url
             // prettier-ignore
-            (youtubeStreamUrl as any).liveData.data.segments.filter((d: any) =>(d.streamInf.codecs[0] as string).includes("mp4a"))[0].url
+            (youtubeStreamUrl as any).liveData.data.segments.filter((d: any) => (d.streamInf.codecs[0] as string).includes("mp4a"))[0].url
           : // If its not live, get archive stream url
             // prettier-ignore
             youtubeStreamUrl.formats.filter((f: any) => (f.mimeType as string).startsWith("audio/mp4;"))[0].url;
