@@ -36,6 +36,14 @@ if [ ${#NAMESPACE} != 0 ]; then
   echo "[+] Found NAMESPACE in environment"
 fi
 
+# make sure DEBUG
+if [ ${#DEBUG} == 0 ]; then
+DEBUG=false
+fi
+if [ ${#DEBUG} != 0 ]; then
+  echo "[+] Found DEBUG in environment"
+fi
+
 echo "[+] Using namespace $NAMESPACE"
 
 # apply to kubernetes
@@ -46,7 +54,7 @@ metadata:
   labels:
     app: discord-youtube
   name: discord-youtube
-  namespace: $(echo $NAMESPACE)
+  namespace: $NAMESPACE
 spec: 
   replicas: 1
   selector:
@@ -64,7 +72,9 @@ spec:
         - name: REPO
           value: https://github.com/ES-Yukun/discord-youtube.git
         - name: DISCORD_TOKEN
-          value: "$(echo $DISCORD_TOKEN)"
+          value: $DISCORD_TOKEN
+        - name: DEBUG
+          value: $DEBUG
         - name: START_COMMAND
           value: npm run archlinux
 EOF
