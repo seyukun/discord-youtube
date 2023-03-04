@@ -37,7 +37,7 @@ const cli = new Discord.Client({
 });
 
 // prettier-ignore
-const debug = async (message: any) => !!process.env.debug ? console.debug(message) : void
+const debug = async (message: any) => !!process.env.DEBUG ? console.debug(message) : void
 
 // prettier-ignore
 cli.on("ready", () => { console.info("ready") });
