@@ -87,6 +87,8 @@ cli.on("messageCreate", async (message) => {
               (f.mimeType as string).startsWith("audio/mp4;")
             )[0].url;
 
+      await debug(url)
+      
       // Create audio player
       let player = DiscordVoice.createAudioPlayer();
 
