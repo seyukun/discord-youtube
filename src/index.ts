@@ -14,7 +14,26 @@ const console = new Logger();
 process.on("uncaughtException", (err) => console.error(err));
 
 const cli = new Discord.Client({
-  intents: Object.values(Discord.GatewayIntentBits).filter(Number.isInteger),
+  intents: [
+    Discord.GatewayIntentBits.DirectMessageReactions,
+    Discord.GatewayIntentBits.DirectMessageTyping,
+    Discord.GatewayIntentBits.DirectMessages,
+    Discord.GatewayIntentBits.GuildBans,
+    Discord.GatewayIntentBits.GuildEmojisAndStickers,
+    Discord.GatewayIntentBits.GuildIntegrations,
+    Discord.GatewayIntentBits.GuildInvites,
+    Discord.GatewayIntentBits.GuildMembers,
+    Discord.GatewayIntentBits.GuildMessageReactions,
+    Discord.GatewayIntentBits.GuildMessageTyping,
+    Discord.GatewayIntentBits.GuildMessages,
+    Discord.GatewayIntentBits.GuildPresences,
+    Discord.GatewayIntentBits.GuildScheduledEvents,
+    Discord.GatewayIntentBits.GuildVoiceStates,
+    Discord.GatewayIntentBits.GuildWebhooks,
+    Discord.GatewayIntentBits.Guilds,
+    Discord.GatewayIntentBits.MessageContent,
+  ],
+  partials: [Discord.Partials.Channel],
 });
 
 // prettier-ignore
