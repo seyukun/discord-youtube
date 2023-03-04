@@ -14,25 +14,14 @@ const console = new Logger();
 process.on("uncaughtException", (err) => console.error(err));
 
 const cli = new Discord.Client({
-  intents: [
-    Discord.GatewayIntentBits.DirectMessageReactions,
-    Discord.GatewayIntentBits.DirectMessages,
-    Discord.GatewayIntentBits.GuildEmojisAndStickers,
-    Discord.GatewayIntentBits.GuildIntegrations,
-    Discord.GatewayIntentBits.GuildInvites,
-    Discord.GatewayIntentBits.GuildMembers,
-    Discord.GatewayIntentBits.GuildMessages,
-    Discord.GatewayIntentBits.GuildVoiceStates,
-    Discord.GatewayIntentBits.Guilds,
-    Discord.GatewayIntentBits.MessageContent,
-  ],
+  intents: Object.values(Discord.GatewayIntentBits),
 });
 
 // prettier-ignore
 const debug = async (message: any) => !!process.env.debug ? console.debug(message) : void
 
 // prettier-ignore
-cli.on("ready", () => { console.info("ready"); });
+cli.on("ready", () => { console.info("ready") });
 
 cli.on("messageCreate", async (message) => {
   if (
@@ -71,11 +60,13 @@ cli.on("messageCreate", async (message) => {
         youtubeStreamUrl.videoDetails.isLiveContent == true &&
         !!Object.keys(youtubeStreamUrl).find((k) => k == "liveData")
           ? // If its live, get live stream url
-            // prettier-ignore
-            (youtubeStreamUrl as any).liveData.data.segments.filter((d: any) => (d.streamInf.codecs[0] as string).includes("mp4a"))[0].url
+            (youtubeStreamUrl as any).liveData.data.segments.filter((d: any) =>
+              (d.streamInf.codecs[0] as string).includes("mp4a")
+            )[0].url
           : // If its not live, get archive stream url
-            // prettier-ignore
-            youtubeStreamUrl.formats.filter((f: any) => (f.mimeType as string).startsWith("audio/mp4;"))[0].url;
+            youtubeStreamUrl.formats.filter((f: any) =>
+              (f.mimeType as string).startsWith("audio/mp4;")
+            )[0].url;
 
       // Create audio player
       let player = DiscordVoice.createAudioPlayer();
