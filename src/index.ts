@@ -14,7 +14,7 @@ const console = new Logger();
 process.on("uncaughtException", (err) => console.error(err));
 
 const cli = new Discord.Client({
-  intents: Object.values(Discord.GatewayIntentBits),
+  intents: Object.values(Discord.GatewayIntentBits).filter(Number.isInteger),
 });
 
 // prettier-ignore
