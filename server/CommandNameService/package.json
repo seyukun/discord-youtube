@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npm i && npx tsc && cd dist && node ."
+    "dev": "npm i && npx tsc && cd dist && node .",
+    "start": "npm i && cd dist && node ."
   },
   "keywords": [],
   "author": "",

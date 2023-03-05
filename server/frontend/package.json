@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start" : "npm i && npx tsc && cd dist && node .",
+    "dev": "npm i && npx tsc && cd dist && node .",
+    "start": "npm i && cd dist && node .",
     "archlinux": "pacman -Syyu --noconfirm ffmpeg && npm i && npx tsc && cd dist && node ."
   },
   "repository": {
@@ -27,11 +28,9 @@
     "discord.js": "^14.7.1",
     "dotenv": "^16.0.3",
     "fluent-ffmpeg": "^2.1.2",
-    "m3u8stream": "^0.8.6",
     "opusscript": "^0.0.8",
     "tslog": "^4.8.1",
     "tweetnacl": "^1.0.3",
-    "typescript": "^4.9.5",
-    "youtube-stream-url": "^2.4.1"
+    "typescript": "^4.9.5"
   }
 }

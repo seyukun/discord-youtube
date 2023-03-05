@@ -76,19 +76,48 @@ spec:
         - name: DEBUG
           value: $DEBUG
         - name: START_COMMAND
-          value: cd ./server/frontend && npm run archlinux
+          value: "git switch micro-service && cd ./server/Frontend && npm run archlinux"
 ---
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   name: coder
-# spec:
-#   selector:
-#     app: coder
-#   type: LoadBalancer
-#   ports:
-#   - name: coder
-#     protocol: TCP
-#     port: 8080
-#     targetPort: http
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: discord-youtube-cns
+  name: discord-youtube-cns
+  namespace: $NAMESPACE
+spec: 
+  replicas: 1
+  selector:
+    matchLabels:
+      app: discord-youtube-cns
+  template:
+    metadata:
+      labels:
+        app: discord-youtube-cns
+    spec:
+      containers:
+      - name: discord-youtube-cns
+        image: docheio/git-runner-nodejs:19.4.0
+        ports:
+        - name: tcp3000
+          containerPort: 3000
+        env:
+        - name: REPO
+          value: https://github.com/ES-Yukun/discord-youtube.git
+        - name: START_COMMAND
+          value: "git switch micro-service && cd ./server/CommandNameService && npm run archlinux"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cns
+spec:
+  selector:
+    app: discord-youtube-cns
+  type: ClusterIP
+  ports:
+  - name: tcp3000
+    protocol: TCP
+    port: 3000
+    targetPort: tcp3000
 EOF
