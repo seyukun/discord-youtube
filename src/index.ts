@@ -101,9 +101,6 @@ cli.on("messageCreate", async (message) => {
       // Configure audio volume (10 / 100)
       audioResource.volume!.setVolume((1 / 100) * 10);
 
-      // Set audio resource to player
-      player.play(audioResource);
-
       // Create connection
       let connection = DiscordVoice.joinVoiceChannel({
         channelId: message.member.voice.channel.id,
@@ -111,7 +108,7 @@ cli.on("messageCreate", async (message) => {
         adapterCreator: message.member.voice.channel.guild.voiceAdapterCreator,
       });
 
-      /** [ Patch ]  Discord Api Bug */
+      /** [ Patch ]  Discord API Bug */
       connection.on("stateChange", (Old, New) =>
         Old.status === DiscordVoice.VoiceConnectionStatus.Ready &&
         New.status === DiscordVoice.VoiceConnectionStatus.Connecting
@@ -120,6 +117,9 @@ cli.on("messageCreate", async (message) => {
             )
           : null
       );
+
+      // Set audio resource to player
+      player.play(audioResource);
 
       // Set audio player to connection
       connection.subscribe(player);
