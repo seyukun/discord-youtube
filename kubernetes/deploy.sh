@@ -72,9 +72,9 @@ spec:
         - name: REPO
           value: https://github.com/ES-Yukun/discord-youtube.git
         - name: DISCORD_TOKEN
-          value: $DISCORD_TOKEN
+          value: "$DISCORD_TOKEN"
         - name: DEBUG
-          value: $DEBUG
+          value: "$DEBUG"
         - name: START_COMMAND
           value: "git switch micro-service && cd ./server/Frontend && npm run archlinux"
 ---

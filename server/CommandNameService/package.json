@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "npm i && npx tsc && cd dist && node .",
-    "start": "npm i && cd dist && node ."
+    "start": "npm i && cd dist && node .",
+    "archlinux": "npm i && cd dist && node ."
   },
   "keywords": [],
   "author": "",
