@@ -89,23 +89,50 @@ cli.on("messageCreate", async (message) => {
               (f.mimeType as string).startsWith("audio/mp4;")
             )[0].url;
 
-      await debug(url);
+      debug(url);
 
-      // Create audio resource
-      // prettier-ignore
-      let audioResource = DiscordVoice.createAudioResource(url, { inlineVolume: true});
+      let { data } = await axios.get<WriteStream>(url, {
+        responseType: "stream",
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
+        },
+      });
+      data.on("pipe", (stream) => {
+        debug(stream)
 
-      // Create audio player
-      let player = DiscordVoice.createAudioPlayer();
+        // Create audio resource
+        // prettier-ignore
+        let audioResource = DiscordVoice.createAudioResource(stream, { inlineVolume: true });
 
-      // Configure audio volume (40 / 100)
-      audioResource.volume!.setVolume((1 / 100) * 40);
+        // Create audio player
+        let player = DiscordVoice.createAudioPlayer();
 
-      // Set audio resource to player
-      player.play(audioResource);
+        // Configure audio volume (10 / 100)
+        audioResource.volume!.setVolume((1 / 100) * 10);
 
-      // Set audio player to connection
-      connection.subscribe(player);
+        // Set audio resource to player
+        player.play(audioResource);
+
+        // Set audio player to connection
+        connection.subscribe(player);
+      });
+
+      // // Create audio resource
+      // // prettier-ignore
+      // let audioResource = DiscordVoice.createAudioResource(url, { inlineVolume: true });
+
+      // // Create audio player
+      // let player = DiscordVoice.createAudioPlayer();
+
+      // // Configure audio volume (10 / 100)
+      // audioResource.volume!.setVolume((1 / 100) * 10);
+
+      // // Set audio resource to player
+      // player.play(audioResource);
+
+      // // Set audio player to connection
+      // connection.subscribe(player);
     }
   }
 });
