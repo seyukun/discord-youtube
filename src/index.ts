@@ -69,29 +69,35 @@ cli.on("messageCreate", async (message) => {
 
     if (!!youtubeStreamUrl) {
       // Get stream url
-      let url: string =
-        // Make sure its live stream
+      let audioSource: Stream.Transform | string;
+
+      if (
         youtubeStreamUrl.videoDetails.isLiveContent == true &&
         !!Object.keys(youtubeStreamUrl).find((k) => k == "liveData")
-          ? // If its live, get live stream url
-            // prettier-ignore
-            (youtubeStreamUrl as any).liveData.data.segments.filter((f: any) => (f.streamInf.codecs[0] as string).includes("mp4a"))[0].url
-          : // If its not live, get archive stream url
-            // prettier-ignore
-            youtubeStreamUrl.formats.filter((f: any) => (f.mimeType as string).startsWith("audio/mp4;"))[0].url;
+      ) {
+        // If its live, get live stream url
+        audioSource = (youtubeStreamUrl as any).liveData.data.segments.filter(
+          (f: any) => (f.streamInf.codecs[0] as string).includes("mp4a")
+        )[0].url;
+      } else {
+        // If its not live, get archive stream url
+        let url = youtubeStreamUrl.formats.filter((f: any) =>
+          (f.mimeType as string).startsWith("audio/mp4;")
+        )[0].url;
 
-      debug(url);
+        // Create Buffer
+        audioSource = new Stream.Transform();
 
-      // Create Buffer of Stream
-      let buffer = new Stream.Transform();
-
-      // Load stream from url using 'AXIOS' and Insert it to buffer
-      let stream = (await axios.get(url, { responseType: "stream" })).data;
-      stream.on("data", (src: Buffer) => buffer.push(src));
+        // Load stream from url using 'AXIOS' and Insert it to buffer
+        let stream = (await axios.get(url, { responseType: "stream" })).data;
+        stream.on("data", (src: Buffer) => {
+          if (audioSource instanceof Stream.Transform) audioSource.push(src);
+        });
+      }
 
       // Create audio resource
       // prettier-ignore
-      let audioResource = DiscordVoice.createAudioResource(buffer, { inlineVolume: true });
+      let audioResource = DiscordVoice.createAudioResource(audioSource, { inlineVolume: true });
 
       // Create audio player
       let player = DiscordVoice.createAudioPlayer();
