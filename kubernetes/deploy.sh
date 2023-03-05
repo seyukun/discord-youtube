@@ -11,11 +11,11 @@
 #                                                                                          #
 #  [ Usage ]                                                                               #
 #  DISCORD_TOKEN=AAAAAAAAAAAA.vvvvvv.BBBBBBBBBBB ./kubernetes/deploy.sh                    #
-#
-#  *Environment options
-#   - NAMESPACE=(default/*)
-#   - DEBUG=(false/true)
-#
+#                                                                                          #
+#  *Environment options                                                                    #
+#   - NAMESPACE=(default/*)                                                                #
+#   - DEBUG=(false/true)                                                                   #
+#                                                                                          #
 ############################################################################################
 
 
