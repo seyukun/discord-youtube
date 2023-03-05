@@ -21,7 +21,7 @@ process.on("uncaughtException", (err) => console.error(err));
 const cli = new Discord.Client({ intents: [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536], partials: [ Discord.Partials.Channel ] });
 
 // prettier-ignore
-const debugSec = async (message:any) => !!process.env.DEBUG ? console.debug(Buffer.from(message).toString("base64")) : null;
+const debug = async (guild: Discord.Guild, message:string ,object:any) => !!process.env.DEBUG ? console.debug(`${guild.id}: ${message}\n${Buffer.from(object).toString("base64")}`) : null;
 
 // AXIOS Config
 // prettier-ignore
@@ -49,41 +49,46 @@ cli.on("messageCreate", async (message) => {
       .slice(2, message.content.length)
       .split(" ")
       .filter((m) => m != "");
+    debug(message.guild, "Recive Request", args);
 
     // Get youtube stream url
-    let youtubeStreamUrl = await YoutubeStreamUrl.getInfo({ url: args[0] });
+    let youtubeStreamInfo = await YoutubeStreamUrl.getInfo({ url: args[0] });
 
-    if (!!youtubeStreamUrl) {
+    if (!!youtubeStreamInfo) {
+      debug(message.guild, "Accept Request", youtubeStreamInfo);
+
       // Create Buffer
       let audioSource = new Stream.Transform();
 
       // Make sure its LiveStream
       if (
-        youtubeStreamUrl.videoDetails.isLiveContent == true &&
-        Object.keys(youtubeStreamUrl).includes("liveData")
+        youtubeStreamInfo.videoDetails.isLiveContent == true &&
+        Object.keys(youtubeStreamInfo).includes("liveData")
       ) {
         /* FOR LIVE STREAMING (HLS) */
 
         // Get Url
         // prettier-ignore
-        let url = (youtubeStreamUrl as any).liveData.data.segments.filter((f: any) => (f.streamInf.codecs[0] as string).includes("mp4a") )[0].url;
+        let url = (youtubeStreamInfo as any).liveData.data.segments.filter((f: any) => (f.streamInf.codecs[0] as string).includes("mp4a") )[0].url;
 
         // Load stream of HLS from url
         (async (stream) => {
           stream.on("data", (src) => audioSource.push(src));
         })(m3u8stream(url));
+        debug(message.guild, "Loaded Stream of HLS", null);
       } else {
         /* FOR ARCHIVE (FILE) */
 
         // Get Url
         // prettier-ignore
-        let url = youtubeStreamUrl.formats.filter((f: any) => (f.mimeType as string).startsWith("audio/mp4;") )[0].url;
+        let url = youtubeStreamInfo.formats.filter((f: any) => (f.mimeType as string).startsWith("audio/mp4;") )[0].url;
 
         // Load stream from url
         let stream = (await axios.get<WriteStream>(url, axiosConfig)).data;
 
         // Insert it to buffer
         stream.on("data", (src: Buffer) => audioSource.push(src));
+        debug(message.guild, "Loaded Stream of file", null);
       }
 
       // Create audio resource
@@ -107,8 +112,14 @@ cli.on("messageCreate", async (message) => {
       });
 
       /** [ Patch ]  Discord Api Bug */
-      // prettier-ignore
-      connection.on("stateChange", (Old, New) => Old.status === "ready" && New.status === "connecting" ?  connection.configureNetworking() : null)
+      connection.on("stateChange", (Old, New) =>
+        Old.status === DiscordVoice.VoiceConnectionStatus.Ready &&
+        New.status === DiscordVoice.VoiceConnectionStatus.Connecting
+          ? ((_) => debug(message.guild!, "KeepAlive", null))(
+              connection.configureNetworking()
+            )
+          : null
+      );
 
       // Set audio player to connection
       connection.subscribe(player);
