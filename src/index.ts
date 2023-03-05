@@ -1,8 +1,10 @@
 import * as Discord from "discord.js";
 import * as DiscordVoice from "@discordjs/voice";
 import * as YoutubeStreamUrl from "youtube-stream-url";
+import axios from "axios";
 import { Logger } from "tslog";
 import { config } from "dotenv";
+import { WriteStream } from "fs";
 
 // Configure environment from .env
 config();
@@ -37,10 +39,11 @@ const cli = new Discord.Client({
 });
 
 // prettier-ignore
-const debug = async (message: any) => !!process.env.DEBUG ? console.debug(message) : void
+const debug = async (message: any) => !!process.env.DEBUG ? console.debug(message) : null;
 
-// prettier-ignore
-cli.on("ready", () => { console.info("ready") });
+cli.on("ready", () => {
+  console.info("ready");
+});
 
 cli.on("messageCreate", async (message) => {
   if (
@@ -71,7 +74,6 @@ cli.on("messageCreate", async (message) => {
     // Get youtube stream url
     let youtubeStreamUrl = await YoutubeStreamUrl.getInfo({ url: args[0] });
 
-    debug(youtubeStreamUrl);
     if (!!youtubeStreamUrl) {
       // Get stream url
       let url: string =
@@ -79,25 +81,25 @@ cli.on("messageCreate", async (message) => {
         youtubeStreamUrl.videoDetails.isLiveContent == true &&
         !!Object.keys(youtubeStreamUrl).find((k) => k == "liveData")
           ? // If its live, get live stream url
-            (youtubeStreamUrl as any).liveData.data.segments.filter((d: any) =>
-              (d.streamInf.codecs[0] as string).includes("mp4a")
+            (youtubeStreamUrl as any).liveData.data.segments.filter((f: any) =>
+              (f.streamInf.codecs[0] as string).includes("mp4a")
             )[0].url
           : // If its not live, get archive stream url
             youtubeStreamUrl.formats.filter((f: any) =>
               (f.mimeType as string).startsWith("audio/mp4;")
             )[0].url;
 
-      await debug(url)
-      
-      // Create audio player
-      let player = DiscordVoice.createAudioPlayer();
+      await debug(url);
 
       // Create audio resource
       // prettier-ignore
-      let audioResource = DiscordVoice.createAudioResource(url, { inlineVolume: true });
+      let audioResource = DiscordVoice.createAudioResource(url, { inlineVolume: true});
 
-      // Configure audio volume (0.04 / 100)
-      audioResource.volume!.setVolume((1 / 100) * 4);
+      // Create audio player
+      let player = DiscordVoice.createAudioPlayer();
+
+      // Configure audio volume (40 / 100)
+      audioResource.volume!.setVolume((1 / 100) * 40);
 
       // Set audio resource to player
       player.play(audioResource);

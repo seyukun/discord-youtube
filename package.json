@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start" : "npm i && npx tsc && cd dist && node .",
+    "start": "npm i && npx tsc && cd dist && node .",
     "archlinux": "pacman -Syyu --noconfirm ffmpeg && npm i && npx tsc && cd dist && node ."
   },
   "repository": {
@@ -20,7 +20,9 @@
   "homepage": "https://github.com/ES-Yukun/discord-youtube#readme",
   "dependencies": {
     "@discordjs/voice": "^0.13.0",
+    "@types/axios": "^0.14.0",
     "@types/node": "^18.11.2",
+    "axios": "^1.3.4",
     "discord.js": "^14.6.0",
     "dotenv": "^16.0.3",
     "fluent-ffmpeg": "^2.1.2",
