@@ -5,7 +5,6 @@ import Stream from "stream";
 import axios from "axios";
 import { Logger } from "tslog";
 import { config } from "dotenv";
-import { WriteStream } from "node:fs";
 
 // Configure environment from .env
 config();
@@ -83,18 +82,16 @@ cli.on("messageCreate", async (message) => {
 
       debug(url);
 
-      let buftrans = new Stream.Transform();
-      // prettier-ignore
-      let response = await axios.get<WriteStream>(url, { responseType: "stream" });
-      let stream = response.data;
-      stream.on("data", (src) => {
-        buftrans.push(src);
-        console.info(src.length);
-      });
+      // Create Buffer of Stream
+      let buffer = new Stream.Transform();
+
+      // Load stream from url using 'AXIOS' and Insert it to buffer
+      let stream = (await axios.get(url, { responseType: "stream" })).data;
+      stream.on("data", (src: Buffer) => buffer.push(src));
 
       // Create audio resource
       // prettier-ignore
-      let audioResource = DiscordVoice.createAudioResource(buftrans, { inlineVolume: true });
+      let audioResource = DiscordVoice.createAudioResource(buffer, { inlineVolume: true });
 
       // Create audio player
       let player = DiscordVoice.createAudioPlayer();
