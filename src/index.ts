@@ -21,7 +21,7 @@ process.on("uncaughtException", (err) => console.error(err));
 const cli = new Discord.Client({ intents: [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536], partials: [ Discord.Partials.Channel ] });
 
 // prettier-ignore
-const debug = async (guild: Discord.Guild, message:string ,object:any) => !!process.env.DEBUG ? console.debug(`${guild.id}: ${message}\n${Buffer.from(object).toString("base64")}`) : null;
+const debug = async (guild: Discord.Guild, message:string) => !!process.env.DEBUG ? console.debug(`${guild.id}: ${message}`) : null;
 
 // AXIOS Config
 // prettier-ignore
@@ -49,13 +49,13 @@ cli.on("messageCreate", async (message) => {
       .slice(2, message.content.length)
       .split(" ")
       .filter((m) => m != "");
-    debug(message.guild, "Recive Request", args);
+    debug(message.guild, "Recive Request");
 
     // Get youtube stream url
     let youtubeStreamInfo = await YoutubeStreamUrl.getInfo({ url: args[0] });
 
     if (!!youtubeStreamInfo) {
-      debug(message.guild, "Accept Request", youtubeStreamInfo);
+      debug(message.guild, "Accept Request");
 
       // Create Buffer
       let audioSource = new Stream.Transform();
@@ -75,7 +75,7 @@ cli.on("messageCreate", async (message) => {
         (async (stream) => {
           stream.on("data", (src) => audioSource.push(src));
         })(m3u8stream(url));
-        debug(message.guild, "Loaded Stream of HLS", null);
+        debug(message.guild, "Loaded Stream of HLS");
       } else {
         /* FOR ARCHIVE (FILE) */
 
@@ -88,7 +88,7 @@ cli.on("messageCreate", async (message) => {
 
         // Insert it to buffer
         stream.on("data", (src: Buffer) => audioSource.push(src));
-        debug(message.guild, "Loaded Stream of file", null);
+        debug(message.guild, "Loaded Stream of file");
       }
 
       // Create audio resource
@@ -115,7 +115,7 @@ cli.on("messageCreate", async (message) => {
       connection.on("stateChange", (Old, New) =>
         Old.status === DiscordVoice.VoiceConnectionStatus.Ready &&
         New.status === DiscordVoice.VoiceConnectionStatus.Connecting
-          ? ((_) => debug(message.guild!, "KeepAlive", null))(
+          ? ((_) => debug(message.guild!, "KeepAlive"))(
               connection.configureNetworking()
             )
           : null
