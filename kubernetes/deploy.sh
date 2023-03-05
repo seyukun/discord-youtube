@@ -46,15 +46,16 @@ fi
 
 echo "[+] Using namespace $NAMESPACE"
 
+kubectl create ns $NAMESPACE
+
 # apply to kubernetes
-kubectl apply -f - << EOF
+kubectl -n $NAMESPACE apply -f - << EOF
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
     app: discord-youtube-frontend
   name: discord-youtube-frontend
-  namespace: $NAMESPACE
 spec: 
   replicas: 1
   selector:
@@ -84,7 +85,6 @@ metadata:
   labels:
     app: discord-youtube-cns
   name: discord-youtube-cns
-  namespace: $NAMESPACE
 spec: 
   replicas: 1
   selector:
