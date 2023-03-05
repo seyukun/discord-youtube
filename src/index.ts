@@ -2,9 +2,11 @@ import * as Discord from "discord.js";
 import * as DiscordVoice from "@discordjs/voice";
 import * as YoutubeStreamUrl from "youtube-stream-url";
 import Stream from "stream";
-import axios from "axios";
+import m3u8stream from "m3u8stream";
+import axios, { AxiosRequestConfig } from "axios";
 import { Logger } from "tslog";
 import { config } from "dotenv";
+import { WriteStream } from "node:fs";
 
 // Configure environment from .env
 config();
@@ -15,31 +17,15 @@ const console = new Logger();
 // continue process when an error occurs and log
 process.on("uncaughtException", (err) => console.error(err));
 
-const cli = new Discord.Client({
-  intents: [
-    Discord.GatewayIntentBits.DirectMessageReactions,
-    Discord.GatewayIntentBits.DirectMessageTyping,
-    Discord.GatewayIntentBits.DirectMessages,
-    Discord.GatewayIntentBits.GuildBans,
-    Discord.GatewayIntentBits.GuildEmojisAndStickers,
-    Discord.GatewayIntentBits.GuildIntegrations,
-    Discord.GatewayIntentBits.GuildInvites,
-    Discord.GatewayIntentBits.GuildMembers,
-    Discord.GatewayIntentBits.GuildMessageReactions,
-    Discord.GatewayIntentBits.GuildMessageTyping,
-    Discord.GatewayIntentBits.GuildMessages,
-    Discord.GatewayIntentBits.GuildPresences,
-    Discord.GatewayIntentBits.GuildScheduledEvents,
-    Discord.GatewayIntentBits.GuildVoiceStates,
-    Discord.GatewayIntentBits.GuildWebhooks,
-    Discord.GatewayIntentBits.Guilds,
-    Discord.GatewayIntentBits.MessageContent,
-  ],
-  partials: [Discord.Partials.Channel],
-});
+// prettier-ignore
+const cli = new Discord.Client({ intents: [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536], partials: [ Discord.Partials.Channel ] });
 
 // prettier-ignore
-const debug = async (message: any) => !!process.env.DEBUG ? console.debug(message) : null;
+const debugSec = async (message:any) => !!process.env.DEBUG ? console.debug(Buffer.from(message).toString("base64")) : null;
+
+// AXIOS Config
+// prettier-ignore
+const axiosConfig: AxiosRequestConfig = { responseType: "stream", headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36" }};
 
 cli.on("ready", () => {
   console.info("ready");
@@ -68,31 +54,36 @@ cli.on("messageCreate", async (message) => {
     let youtubeStreamUrl = await YoutubeStreamUrl.getInfo({ url: args[0] });
 
     if (!!youtubeStreamUrl) {
-      // Get stream url
-      let audioSource: Stream.Transform | string;
+      // Create Buffer
+      let audioSource = new Stream.Transform();
 
+      // Make sure its LiveStream
       if (
         youtubeStreamUrl.videoDetails.isLiveContent == true &&
-        !!Object.keys(youtubeStreamUrl).find((k) => k == "liveData")
+        Object.keys(youtubeStreamUrl).includes("liveData")
       ) {
-        // If its live, get live stream url
-        audioSource = (youtubeStreamUrl as any).liveData.data.segments.filter(
-          (f: any) => (f.streamInf.codecs[0] as string).includes("mp4a")
-        )[0].url;
+        /* FOR LIVE STREAMING (HLS) */
+
+        // Get Url
+        // prettier-ignore
+        let url = (youtubeStreamUrl as any).liveData.data.segments.filter((f: any) => (f.streamInf.codecs[0] as string).includes("mp4a") )[0].url;
+
+        // Load stream of HLS from url
+        (async (stream) => {
+          stream.on("data", (src) => audioSource.push(src));
+        })(m3u8stream(url));
       } else {
-        // If its not live, get archive stream url
-        let url = youtubeStreamUrl.formats.filter((f: any) =>
-          (f.mimeType as string).startsWith("audio/mp4;")
-        )[0].url;
+        /* FOR ARCHIVE (FILE) */
 
-        // Create Buffer
-        audioSource = new Stream.Transform();
+        // Get Url
+        // prettier-ignore
+        let url = youtubeStreamUrl.formats.filter((f: any) => (f.mimeType as string).startsWith("audio/mp4;") )[0].url;
 
-        // Load stream from url using 'AXIOS' and Insert it to buffer
-        let stream = (await axios.get(url, { responseType: "stream" })).data;
-        stream.on("data", (src: Buffer) => {
-          if (audioSource instanceof Stream.Transform) audioSource.push(src);
-        });
+        // Load stream from url
+        let stream = (await axios.get<WriteStream>(url, axiosConfig)).data;
+
+        // Insert it to buffer
+        stream.on("data", (src: Buffer) => audioSource.push(src));
       }
 
       // Create audio resource
@@ -115,10 +106,7 @@ cli.on("messageCreate", async (message) => {
         adapterCreator: message.member.voice.channel.guild.voiceAdapterCreator,
       });
 
-      /**
-       *  [ Patch ]
-       *  Discord Api Bug
-       **/
+      /** [ Patch ]  Discord Api Bug */
       // prettier-ignore
       connection.on("stateChange", (Old, New) => Old.status === "ready" && New.status === "connecting" ?  connection.configureNetworking() : null)
 
