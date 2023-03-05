@@ -1,10 +1,11 @@
 import * as Discord from "discord.js";
 import * as DiscordVoice from "@discordjs/voice";
 import * as YoutubeStreamUrl from "youtube-stream-url";
+import Stream from "stream";
 import axios from "axios";
 import { Logger } from "tslog";
 import { config } from "dotenv";
-import { WriteStream } from "fs";
+import { WriteStream } from "node:fs";
 
 // Configure environment from .env
 config();
@@ -64,13 +65,6 @@ cli.on("messageCreate", async (message) => {
       .split(" ")
       .filter((m) => m != "");
 
-    // Create connection
-    let connection = DiscordVoice.joinVoiceChannel({
-      channelId: message.member.voice.channel.id,
-      guildId: message.guild.id,
-      adapterCreator: message.member.voice.channel.guild.voiceAdapterCreator,
-    });
-
     // Get youtube stream url
     let youtubeStreamUrl = await YoutubeStreamUrl.getInfo({ url: args[0] });
 
@@ -81,58 +75,52 @@ cli.on("messageCreate", async (message) => {
         youtubeStreamUrl.videoDetails.isLiveContent == true &&
         !!Object.keys(youtubeStreamUrl).find((k) => k == "liveData")
           ? // If its live, get live stream url
-            (youtubeStreamUrl as any).liveData.data.segments.filter((f: any) =>
-              (f.streamInf.codecs[0] as string).includes("mp4a")
-            )[0].url
+            // prettier-ignore
+            (youtubeStreamUrl as any).liveData.data.segments.filter((f: any) => (f.streamInf.codecs[0] as string).includes("mp4a"))[0].url
           : // If its not live, get archive stream url
-            youtubeStreamUrl.formats.filter((f: any) =>
-              (f.mimeType as string).startsWith("audio/mp4;")
-            )[0].url;
+            // prettier-ignore
+            youtubeStreamUrl.formats.filter((f: any) => (f.mimeType as string).startsWith("audio/mp4;"))[0].url;
 
       debug(url);
 
-      let { data } = await axios.get<WriteStream>(url, {
-        responseType: "stream",
-        headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
-        },
-      });
-      data.on("pipe", (stream) => {
-        debug(stream)
-
-        // Create audio resource
-        // prettier-ignore
-        let audioResource = DiscordVoice.createAudioResource(stream, { inlineVolume: true });
-
-        // Create audio player
-        let player = DiscordVoice.createAudioPlayer();
-
-        // Configure audio volume (10 / 100)
-        audioResource.volume!.setVolume((1 / 100) * 10);
-
-        // Set audio resource to player
-        player.play(audioResource);
-
-        // Set audio player to connection
-        connection.subscribe(player);
+      let buftrans = new Stream.Transform();
+      // prettier-ignore
+      let response = await axios.get<WriteStream>(url, { responseType: "stream" });
+      let stream = response.data;
+      stream.on("data", (src) => {
+        buftrans.push(src);
+        console.info(src.length);
       });
 
-      // // Create audio resource
-      // // prettier-ignore
-      // let audioResource = DiscordVoice.createAudioResource(url, { inlineVolume: true });
+      // Create audio resource
+      // prettier-ignore
+      let audioResource = DiscordVoice.createAudioResource(buftrans, { inlineVolume: true });
 
-      // // Create audio player
-      // let player = DiscordVoice.createAudioPlayer();
+      // Create audio player
+      let player = DiscordVoice.createAudioPlayer();
 
-      // // Configure audio volume (10 / 100)
-      // audioResource.volume!.setVolume((1 / 100) * 10);
+      // Configure audio volume (10 / 100)
+      audioResource.volume!.setVolume((1 / 100) * 10);
 
-      // // Set audio resource to player
-      // player.play(audioResource);
+      // Set audio resource to player
+      player.play(audioResource);
 
-      // // Set audio player to connection
-      // connection.subscribe(player);
+      // Create connection
+      let connection = DiscordVoice.joinVoiceChannel({
+        channelId: message.member.voice.channel.id,
+        guildId: message.guild.id,
+        adapterCreator: message.member.voice.channel.guild.voiceAdapterCreator,
+      });
+
+      /**
+       *  [ Patch ]
+       *  Discord Api Bug
+       **/
+      // prettier-ignore
+      connection.on("stateChange", (Old, New) => Old.status === "ready" && New.status === "connecting" ?  connection.configureNetworking() : null)
+
+      // Set audio player to connection
+      connection.subscribe(player);
     }
   }
 });
