@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npm i && npx tsc && cd dist && node .",
-    "archlinux": "pacman -Syyu --noconfirm ffmpeg && npm i && npx tsc && cd dist && node ."
+    "start": "npm i > /dev/null && npx tsc > /dev/null && cd dist && node .",
+    "archlinux": "pacman -Syyu --noconfirm ffmpeg > /dev/null && npm i > /dev/null && npx tsc > /dev/null && cd dist && node ."
   },
   "repository": {
     "type": "git",
@@ -33,5 +33,8 @@
     "tweetnacl": "^1.0.3",
     "typescript": "^4.9.5",
     "youtube-stream-url": "^2.4.1"
+  },
+  "devDependencies": {
+    "@types/fluent-ffmpeg": "^2.1.21"
   }
 }

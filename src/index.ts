@@ -3,10 +3,10 @@ import * as DiscordVoice from "@discordjs/voice";
 import * as YoutubeStreamUrl from "youtube-stream-url";
 import Stream from "stream";
 import m3u8stream from "m3u8stream";
+import Ffmpeg from "fluent-ffmpeg";
 import axios, { AxiosRequestConfig } from "axios";
 import { Logger } from "tslog";
 import { config } from "dotenv";
-import { WriteStream } from "node:fs";
 
 // Configure environment from .env
 config();
@@ -84,10 +84,10 @@ cli.on("messageCreate", async (message) => {
         let url = youtubeStreamInfo.formats.filter((f: any) => (f.mimeType as string).startsWith("audio/mp4;") )[0].url;
 
         // Load stream from url
-        let stream = (await axios.get<WriteStream>(url, axiosConfig)).data;
+        let stream = (await axios.get<Stream.Transform>(url, axiosConfig)).data;
 
         // Insert it to buffer
-        stream.on("data", (src: Buffer) => audioSource.push(src));
+        stream.on("data", async (src: Buffer) => audioSource.push(src));
         debug(message.guild, "Loaded Stream of file");
       }
 
