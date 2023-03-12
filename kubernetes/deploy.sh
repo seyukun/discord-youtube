@@ -118,6 +118,6 @@ spec:
   ports:
   - name: tcp3000
     protocol: TCP
-    port: 3000
+    port: 80
     targetPort: tcp3000
 EOF

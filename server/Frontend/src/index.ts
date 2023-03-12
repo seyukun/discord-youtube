@@ -30,18 +30,18 @@ cli.on("messageCreate", async (message) => {
       .split(" ")
       .filter((m) => m != "");
 
-    let response = await axios.get<{ domain: string; description: string }>(
-      `http://cns:3000/api/v1/${args[0]}`
-    );
-
-    if (
-      Object.keys(response.data).includes("domain") &&
-      Object.keys(response.data).includes("description") &&
-      Object.keys(response.data).length == 2
-    ) {
-      let domain = response.data.domain;
-      let description = response.data.description;
-      message.reply(`${domain}: ${description}`);
+    switch (args[0]) {
+      case "play": {
+        
+      }
+      case "stop": {
+      }
+      case "exit": {
+      }
+      case "skip": {
+      }
+      default: {
+      }
     }
   }
 });
