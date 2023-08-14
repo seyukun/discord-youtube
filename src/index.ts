@@ -1,12 +1,12 @@
-import * as Discord from "discord.js";
-import * as DiscordVoice from "@discordjs/voice";
-import * as YoutubeStreamUrl from "youtube-stream-url";
-import Stream from "stream";
-import m3u8stream from "m3u8stream";
-import Ffmpeg from "fluent-ffmpeg";
-import axios, { AxiosRequestConfig } from "axios";
-import { Logger } from "tslog";
-import { config } from "dotenv";
+/* pritter-ignore */ import * as Discord          from "discord.js";
+/* pritter-ignore */ import * as DiscordVoice     from "@discordjs/voice";
+/* pritter-ignore */ import * as YoutubeStreamUrl from "youtube-stream-url";
+/* pritter-ignore */ import Stream                from "stream";
+/* pritter-ignore */ import m3u8stream            from "m3u8stream";
+/* pritter-ignore */ import Ffmpeg                from "fluent-ffmpeg";
+/* pritter-ignore */ import { Logger }            from "tslog";
+/* pritter-ignore */ import { config }            from "dotenv";
+/* pritter-ignore */ import axios, { AxiosRequestConfig } from "axios";
 
 // Configure environment from .env
 config();
